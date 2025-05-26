@@ -1,0 +1,71 @@
+﻿@model IINSwalayan.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="stats-card text-center">
+            <div class="stats-number">@Model.TotalProducts</div>
+            <div class="stats-label"><i class="fas fa-box"></i> Total Produk</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card text-center">
+            <div class="stats-number">@Model.TotalCategories</div>
+            <div class="stats-label"><i class="fas fa-tags"></i> Total Kategori</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card text-center">
+            <div class="stats-number text-warning">@Model.LowStockProducts</div>
+            <div class="stats-label"><i class="fas fa-exclamation-triangle"></i> Stok Menipis</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card text-center">
+            <a href="#" class="btn-admin">
+                <i class="fas fa-plus"></i> Tambah Produk
+            </a>
+            <div class="stats-label mt-2">Aksi Cepat</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="stats-card">
+            <h5><i class="fas fa-clock text-primary"></i> Produk Terbaru</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nama Produk</th>
+                            <th>Kategori</th>
+                            <th>Harga</th>
+                            <th>Stok</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var product in Model.RecentProducts)
+                        {
+                            <tr>
+                                <td><strong>@product.Name</strong></td>
+                                <td><span class="badge bg-secondary">@product.Category.Name</span></td>
+                                <td><strong>Rp @product.Price.ToString("N0")</strong></td>
+                                <td>
+                                    <span class="badge @(product.Stock <= 10 ? "bg-danger" : "bg-success")">
+                                        @product.Stock
+                                    </span>
+                                </td>
+                                <td>@product.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
