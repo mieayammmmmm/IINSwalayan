@@ -1,0 +1,123 @@
+﻿@{
+    ViewData["Title"] = "Kelola Kategori";
+    var categories = ViewBag.Categories as List<IINSwalayan.Models.Category> ?? new List<IINSwalayan.Models.Category>();
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-tags"></i> Kelola Kategori
+                </h5>
+                <a href="@Url.Action("Create")" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Tambah Kategori
+                </a>
+            </div>
+            <div class="card-body">
+                @if (categories.Any())
+                {
+                    <div class="row">
+                        @foreach (var category in categories)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="flex-grow-1">
+                                                <h6 class="card-title mb-2">
+                                                    @if (!string.IsNullOrEmpty(category.IconClass))
+                                                    {
+                                                        <i class="@category.IconClass me-2"></i>
+                                                    }
+                                                    @category.Name
+                                                </h6>
+                                                @if (!string.IsNullOrEmpty(category.Description))
+                                                {
+                                                    <p class="card-text text-muted small">@category.Description</p>
+                                                }
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <a class="dropdown-item" href="@Url.Action("Edit", new { id = category.Id })">
+                                                            <i class="fas fa-edit text-warning"></i> Edit
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="@Url.Action("Delete", new { id = category.Id })" 
+                                                           onclick="return confirm('Yakin ingin menghapus kategori @category.Name?')">
+                                                            <i class="fas fa-trash"></i> Hapus
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-info">
+                                                    @category.Products.Count(p => p.IsActive) Produk
+                                                </span>
+                                                @if (category.IsActive)
+                                                {
+                                                    <span class="badge bg-success">Aktif</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary">Nonaktif</span>
+                                                }
+                                            </div>
+                                            @if (!string.IsNullOrEmpty(category.IconClass))
+                                            {
+                                                <div class="text-muted">
+                                                    <i class="@category.IconClass fa-2x"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            Total: @categories.Count kategori
+                        </small>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                        <h5>Belum ada kategori</h5>
+                        <p class="text-muted">Mulai dengan menambahkan kategori produk pertama Anda.</p>
+                        <a href="@Url.Action("Create")" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Tambah Kategori Pertama
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
