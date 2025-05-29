@@ -1,0 +1,218 @@
+﻿@{
+    ViewData["Title"] = "Edit Produk";
+    var product = ViewBag.Product as IINSwalayan.Models.Product;
+    var categories = ViewBag.Categories as List<IINSwalayan.Models.Category> ?? new List<IINSwalayan.Models.Category>();
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> Edit Produk
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (product != null)
+                {
+                    <form method="post" asp-action="Edit" asp-route-id="@product.Id" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Nama Produk *</label>
+                                    <input name="name" id="name" type="text" class="form-control" placeholder="Masukkan nama produk" value="@product.Name" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Deskripsi</label>
+                                    <textarea name="description" id="description" class="form-control" rows="4" placeholder="Deskripsi produk (opsional)">@product.Description</textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="price" class="form-label">Harga *</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Rp</span>
+                                                <input name="price" id="price" type="number" step="0.01" class="form-control" placeholder="0" value="@product.Price" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="stock" class="form-label">Stok *</label>
+                                            <input name="stock" id="stock" type="number" class="form-control" placeholder="0" value="@product.Stock" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="categoryId" class="form-label">Kategori *</label>
+                                    <select name="categoryId" id="categoryId" class="form-select" required>
+                                        <option value="">-- Pilih Kategori --</option>
+                                        @foreach (var category in categories)
+                                        {
+                                            <option value="@category.Id" @(category.Id == product.CategoryId ? "selected" : "")>@category.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Gambar Produk</label>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <!-- Current Image -->
+                                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                            {
+                                                <div class="mb-3">
+                                                    <label class="form-label">Gambar Saat Ini</label>
+                                                    <div class="text-center">
+                                                        <img src="@product.ImageUrl" alt="Current Image" class="img-thumbnail" style="max-height: 150px;">
+                                                        <p class="text-muted mt-2"><small>Gambar saat ini</small></p>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <!-- File Upload -->
+                                            <div class="mb-3">
+                                                <label for="imageFile" class="form-label">Upload Gambar Baru</label>
+                                                <input name="imageFile" id="imageFile" type="file" class="form-control" accept="image/*" onchange="previewFile()">
+                                                <div class="form-text">Format: JPG, PNG, GIF, WebP. Maksimal 5MB.</div>
+                                            </div>
+
+                                            <!-- OR -->
+                                            <div class="text-center mb-2">
+                                                <small class="text-muted">-- ATAU --</small>
+                                            </div>
+
+                                            <!-- URL Input -->
+                                            <div class="mb-3">
+                                                <label for="imageUrl" class="form-label">URL Gambar</label>
+                                                <input name="imageUrl" id="imageUrl" type="url" class="form-control" placeholder="https://example.com/image.jpg" value="@product.ImageUrl">
+                                                <div class="form-text">Kosongkan jika ingin menggunakan upload file</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Preview Gambar Baru</label>
+                                    <div id="imagePreview" class="border rounded p-3 text-center bg-light">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                        <p class="text-muted mt-2">Preview gambar baru akan muncul di sini</p>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input name="isActive" id="isActive" class="form-check-input" type="checkbox" value="true" @(product.IsActive ? "checked" : "")>
+                                        <input name="isActive" type="hidden" value="false">
+                                        <label for="isActive" class="form-check-label">
+                                            Produk Aktif
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Kembali
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Produk
+                            </button>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Produk tidak ditemukan.
+                    </div>
+                    <a href="@Url.Action("Index")" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Daftar Produk
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Preview uploaded file
+    function previewFile() {
+        const fileInput = document.getElementById('imageFile');
+        const preview = document.getElementById('imagePreview');
+        const urlInput = document.getElementById('imageUrl');
+        const file = fileInput.files[0];
+
+        if (file) {
+            // Clear URL input when file is selected
+            urlInput.value = '';
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Harap pilih file gambar yang valid!');
+                fileInput.value = '';
+                return;
+            }
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Ukuran file terlalu besar! Maksimal 5MB.');
+                fileInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" class="img-fluid rounded" style="max-height: 200px;">
+                    <p class="text-success mt-2"><small><i class="fas fa-check"></i> ${file.name}</small></p>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Preview URL image
+    document.getElementById('imageUrl').addEventListener('input', function() {
+        const url = this.value;
+        const preview = document.getElementById('imagePreview');
+        const fileInput = document.getElementById('imageFile');
+
+        if (url) {
+            // Clear file input when URL is entered
+            fileInput.value = '';
+
+            preview.innerHTML = `
+                <img src="${url}" alt="Preview" class="img-fluid rounded" style="max-height: 200px;"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none;">
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning"></i>
+                    <p class="text-warning mt-2">Gambar tidak dapat dimuat</p>
+                </div>
+            `;
+        } else if (!fileInput.files[0]) {
+            preview.innerHTML = `
+                <i class="fas fa-image fa-3x text-muted"></i>
+                <p class="text-muted mt-2">Preview gambar baru akan muncul di sini</p>
+            `;
+        }
+    });
+</script>

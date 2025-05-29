@@ -92,6 +92,30 @@
             background-color: #f8f9fa;
             border-radius: 10px;
         }
+
+        .loading {
+            display: none;
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .password-toggle {
+            position: relative;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: #6c757d;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -109,32 +133,49 @@
                 </div>
             }
 
-            <form method="post">
+            <form method="post" id="loginForm" asp-controller="Account" asp-action="Login">
+                @Html.AntiForgeryToken()
+
+                @if (ViewData["ReturnUrl"] != null)
+                {
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                }
+
                 <div class="mb-3">
-                    <label class="form-label">Email Admin</label>
-                    <input name="email" type="email" class="form-control"
+                    <label class="form-label" for="email">Email Admin</label>
+                    <input name="email" id="email" type="email" class="form-control"
                            placeholder="admin@iinswalayan.com"
-                           value="admin@iinswalayan.com" required />
+                           value="" required autocomplete="email" />
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label">Password</label>
-                    <input name="password" type="password" class="form-control"
-                           placeholder="Masukkan password" required />
+                    <label class="form-label" for="password">Password</label>
+                    <div class="password-toggle">
+                        <input name="password" id="password" type="password" class="form-control"
+                               placeholder="Masukkan password" required autocomplete="current-password" />
+                        <button type="button" class="password-toggle-btn" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-login">
-                    <i class="fas fa-sign-in-alt"></i> Login ke Dashboard
+                <button type="submit" class="btn btn-login" id="loginBtn">
+                    <span class="login-text">
+                        <i class="fas fa-sign-in-alt"></i> Login 
+                    </span>
+                    <span class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Memproses...
+                    </span>
                 </button>
             </form>
 
-            <div class="login-footer">
+            @* <div class="login-footer">
                 <small class="text-muted">
                     <strong>Default Login:</strong><br>
                     Email: admin@iinswalayan.com<br>
                     Password: Admin123!
                 </small>
-            </div>
+            </div> *@
 
             <div class="text-center mt-3">
                 <a href="@Url.Action("Index", "Home")" class="text-muted">
@@ -145,5 +186,49 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        // Toggle password visibility
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Form submission handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const loginBtn = document.getElementById('loginBtn');
+            const loginText = loginBtn.querySelector('.login-text');
+            const loading = loginBtn.querySelector('.loading');
+
+            // Show loading state
+            loginText.style.display = 'none';
+            loading.style.display = 'inline';
+            loginBtn.disabled = true;
+
+            // Re-enable after 10 seconds (in case of server error)
+            setTimeout(function() {
+                loginText.style.display = 'inline';
+                loading.style.display = 'none';
+                loginBtn.disabled = false;
+            }, 10000);
+        });
+
+        // Auto-fill for development (remove in production)
+        document.addEventListener('DOMContentLoaded', function() {
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                document.getElementById('email').value = 'admin@iinswalayan.com';
+                // Don't auto-fill password for security
+            }
+        });
+    </script>
 </body>
 </html>

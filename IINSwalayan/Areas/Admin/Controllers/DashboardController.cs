@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IINSwalayan.Data;
-using IINSwalayan.Models;
 
 namespace IINSwalayan.Areas.Admin.Controllers
 {
@@ -11,30 +10,66 @@ namespace IINSwalayan.Areas.Admin.Controllers
     public class DashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<DashboardController> _logger;
 
-        public DashboardController(ApplicationDbContext context)
+        public DashboardController(ApplicationDbContext context, ILogger<DashboardController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
         {
-            var viewModel = new DashboardViewModel
+            try
             {
-                TotalProducts = await _context.Products.CountAsync(p => p.IsActive),
-                TotalCategories = await _context.Categories.CountAsync(c => c.IsActive),
-                LowStockProducts = await _context.Products.CountAsync(p => p.Stock <= 10 && p.IsActive),
-                RecentProducts = await _context.Products
-                    .Include(p => p.Category)
-                    .Where(p => p.IsActive)
-                    .OrderByDescending(p => p.CreatedAt)
-                    .Take(5)
-                    .ToListAsync()
-            };
+                _logger.LogInformation($"Admin dashboard accessed by {User.Identity?.Name}");
 
-            return View(viewModel);
+                // Initialize default values
+                ViewBag.TotalProducts = 0;
+                ViewBag.TotalCategories = 0;
+                ViewBag.LowStockProducts = 0;
+
+                // Safely get counts if tables exist
+                try
+                {
+                    if (await _context.Products.AnyAsync())
+                    {
+                        ViewBag.TotalProducts = await _context.Products.CountAsync(p => p.IsActive);
+                        ViewBag.LowStockProducts = await _context.Products.CountAsync(p => p.Stock <= 10 && p.IsActive);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Error accessing Products table");
+                }
+
+                try
+                {
+                    if (await _context.Categories.AnyAsync())
+                    {
+                        ViewBag.TotalCategories = await _context.Categories.CountAsync(c => c.IsActive);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Error accessing Categories table");
+                }
+
+                ViewData["Title"] = "Dashboard Admin";
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading admin dashboard");
+
+                // Set safe default values
+                ViewBag.TotalProducts = 0;
+                ViewBag.TotalCategories = 0;
+                ViewBag.LowStockProducts = 0;
+                ViewBag.Error = "Terjadi kesalahan saat memuat dashboard.";
+
+                return View();
+            }
         }
     }
-
-
 }
