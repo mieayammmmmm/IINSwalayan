@@ -1,0 +1,376 @@
+﻿@{
+    ViewData["Title"] = "Kelola Pesanan";
+    var orders = ViewBag.Orders as List<IINSwalayan.Models.Order> ?? new List<IINSwalayan.Models.Order>();
+    var orderStatuses = ViewBag.OrderStatuses as Array;
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-shopping-cart"></i> Kelola Pesanan
+                </h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                    <a href="@Url.Action("Export", new { status = ViewBag.StatusFilter, startDate = ViewBag.StartDate, endDate = ViewBag.EndDate })" 
+                       class="btn btn-success">
+                        <i class="fas fa-download"></i> Export Excel
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Filter Section -->
+            <div class="collapse @((!string.IsNullOrEmpty(ViewBag.StatusFilter) || !string.IsNullOrEmpty(ViewBag.StartDate)) ? "show" : "")" id="filterCollapse">
+                <div class="card-body border-bottom">
+                    <form method="get" asp-action="Index" class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">Semua Status</option>
+                                @if (orderStatuses != null)
+                                {
+                                    @foreach (var status in orderStatuses)
+                                    {
+                                        var statusValue = status.ToString();
+                                        var displayName = GetStatusDisplayName(statusValue);
+                                        <option value="@statusValue" @(ViewBag.StatusFilter == statusValue ? "selected" : "")>
+                                            @displayName
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tanggal Mulai</label>
+                            <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Tanggal Selesai</label>
+                            <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> Filter
+                            </button>
+                            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Reset
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card-body">
+                @if (orders.Any())
+                {
+                    <!-- Statistics Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body text-center">
+                                    <h3>@orders.Count(o => o.Status == IINSwalayan.Models.OrderStatus.Pending)</h3>
+                                    <p class="mb-0">Menunggu Konfirmasi</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3>@orders.Count(o => o.Status == IINSwalayan.Models.OrderStatus.Processing)</h3>
+                                    <p class="mb-0">Sedang Diproses</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3>@orders.Count(o => o.Status == IINSwalayan.Models.OrderStatus.Delivered)</h3>
+                                    <p class="mb-0">Selesai</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h3>Rp @orders.Where(o => o.Status != IINSwalayan.Models.OrderStatus.Cancelled).Sum(o => o.TotalAmount).ToString("N0")</h3>
+                                    <p class="mb-0">Total Pendapatan</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>No. Pesanan</th>
+                                    <th>Tanggal</th>
+                                    <th>Customer</th>
+                                    <th>Items</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in orders)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>#@order.OrderNumber</strong>
+                                        </td>
+                                        <td>
+                                            @order.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <strong>@order.CustomerName</strong><br>
+                                                <small class="text-muted">@order.CustomerEmail</small><br>
+                                                <small class="text-muted">@order.CustomerPhone</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">@order.OrderItems.Count item(s)</span>
+                                        </td>
+                                        <td>
+                                            <strong class="text-success">Rp @order.TotalAmount.ToString("N0")</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge @GetStatusBadgeClass(order.Status)" id="status-badge-@order.Id">
+                                                @GetStatusDisplayName(order.Status.ToString())
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="@Url.Action("Details", new { id = order.Id })" 
+                                                   class="btn btn-sm btn-outline-info" title="Detail">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-warning" 
+                                                        title="Update Status" 
+                                                        onclick="showUpdateStatusModal(@order.Id, '@order.Status', '@order.OrderNumber')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <a href="@Url.Action("Print", new { id = order.Id })" 
+                                                   class="btn btn-sm btn-outline-secondary" 
+                                                   title="Print" target="_blank">
+                                                    <i class="fas fa-print"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            Total: @orders.Count pesanan
+                        </small>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                        <h5>Belum ada pesanan</h5>
+                        <p class="text-muted">Pesanan customer akan muncul di sini.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Status Pesanan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="updateStatusForm">
+                <div class="modal-body">
+                    <input type="hidden" id="orderId" name="id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Pesanan: <span id="orderNumber"></span></label>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status Baru</label>
+                        <select id="status" name="status" class="form-select" required>
+                            @if (orderStatuses != null)
+                            {
+                                @foreach (var status in orderStatuses)
+                                {
+                                    var statusValue = status.ToString();
+                                    var displayName = GetStatusDisplayName(statusValue);
+                                    <option value="@statusValue">@displayName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Catatan (opsional)</label>
+                        <textarea id="notes" name="notes" class="form-control" rows="3" 
+                                  placeholder="Tambahkan catatan untuk customer..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusDisplayName(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Menunggu Konfirmasi",
+            "Confirmed" => "Dikonfirmasi",
+            "Processing" => "Diproses",
+            "Shipped" => "Dikirim",
+            "Delivered" => "Selesai",
+            "Cancelled" => "Dibatalkan",
+            _ => status
+        };
+    }
+    
+    private string GetStatusBadgeClass(IINSwalayan.Models.OrderStatus status)
+    {
+        return status switch
+        {
+            IINSwalayan.Models.OrderStatus.Pending => "bg-warning",
+            IINSwalayan.Models.OrderStatus.Confirmed => "bg-info",
+            IINSwalayan.Models.OrderStatus.Processing => "bg-primary",
+            IINSwalayan.Models.OrderStatus.Shipped => "bg-secondary",
+            IINSwalayan.Models.OrderStatus.Delivered => "bg-success",
+            IINSwalayan.Models.OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<script>
+    function showUpdateStatusModal(orderId, currentStatus, orderNumber) {
+        document.getElementById('orderId').value = orderId;
+        document.getElementById('status').value = currentStatus;
+        document.getElementById('orderNumber').textContent = '#' + orderNumber;
+        document.getElementById('notes').value = '';
+        
+        var modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+        modal.show();
+    }
+
+    document.getElementById('updateStatusForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var formData = new FormData(this);
+        
+        // Add anti-forgery token
+        var token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            formData.append('__RequestVerificationToken', token.value);
+        }
+        
+        fetch('@Url.Action("UpdateStatus")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update badge in table
+                var orderId = document.getElementById('orderId').value;
+                var badge = document.getElementById('status-badge-' + orderId);
+                if (badge) {
+                    badge.textContent = data.newStatusDisplay;
+                    badge.className = 'badge ' + getStatusBadgeClass(data.newStatus);
+                }
+                
+                // Close modal
+                var modal = bootstrap.Modal.getInstance(document.getElementById('updateStatusModal'));
+                modal.hide();
+                
+                // Show success message
+                showAlert('success', data.message);
+                
+                // Optionally reload page to update statistics
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'Terjadi kesalahan saat mengupdate status.');
+        });
+    });
+
+    function getStatusBadgeClass(status) {
+        switch(status) {
+            case 'Pending': return 'bg-warning';
+            case 'Confirmed': return 'bg-info';
+            case 'Processing': return 'bg-primary';
+            case 'Shipped': return 'bg-secondary';
+            case 'Delivered': return 'bg-success';
+            case 'Cancelled': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+
+    function showAlert(type, message) {
+        var alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        // Insert at top of content
+        var cardBody = document.querySelector('.card-body');
+        cardBody.insertAdjacentHTML('afterbegin', alertHtml);
+        
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            var alert = cardBody.querySelector('.alert');
+            if (alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    }
+</script>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

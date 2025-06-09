@@ -34,16 +34,15 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 // PENTING: Area routes harus didefinisikan SEBELUM default route
+// PERBAIKAN: Ganti controller default dari Home ke Dashboard untuk area Admin
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
@@ -91,7 +90,8 @@ static async Task SeedAdminUser(UserManager<ApplicationUser> userManager, RoleMa
         {
             UserName = adminEmail,
             Email = adminEmail,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            FullName = "Administrator" // Tambahkan ini jika diperlukan
         };
 
         var result = await userManager.CreateAsync(adminUser, adminPassword);

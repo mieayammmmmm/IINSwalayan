@@ -1,0 +1,310 @@
+﻿@{
+    var order = ViewBag.Order as IINSwalayan.Models.Order;
+    var orderStatuses = ViewBag.OrderStatuses as Array;
+    ViewData["Title"] = $"Detail Pesanan #{order?.OrderNumber}";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="@Url.Action("Index")">Kelola Pesanan</a>
+                    </li>
+                    <li class="breadcrumb-item active">Detail Pesanan</li>
+                </ol>
+            </nav>
+
+            <div class="btn-group">
+                <a href="@Url.Action("Index")" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Kembali
+                </a>
+                <a href="@Url.Action("Print", new { id = order?.Id })" class="btn btn-outline-primary" target="_blank">
+                    <i class="fas fa-print"></i> Print
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (order != null)
+{
+    <div class="row">
+        <!-- Order Info -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shopping-cart"></i> Pesanan #@order.OrderNumber
+                    </h5>
+                    <span class="badge @GetStatusBadgeClass(order.Status) fs-6" id="current-status-badge">
+                        @GetStatusDisplayName(order.Status.ToString())
+                    </span>
+                </div>
+                <div class="card-body">
+                    <!-- Order Items -->
+                    <h6 class="mb-3">Item Pesanan</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produk</th>
+                                    <th>Kategori</th>
+                                    <th>Harga Satuan</th>
+                                    <th>Qty</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in order.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                                {
+                                                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name"
+                                                         class="me-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                                }
+                                                <div>
+                                                    <strong>@item.Product?.Name</strong>
+                                                    @if (!string.IsNullOrEmpty(item.Product?.Description))
+                                                    {
+                                                        <br>
+                                            
+                                                        <small class="text-muted">@item.Product.Description.Substring(0, Math.Min(80, item.Product.Description.Length))@(item.Product.Description.Length > 80 ? "..." : "")</small>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if (item.Product?.Category != null)
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    @if (!string.IsNullOrEmpty(item.Product.Category.IconClass))
+                                                    {
+                                                        <i class="@item.Product.Category.IconClass"></i>
+                                                    }
+                                                    @item.Product.Category.Name
+                                                </span>
+                                            }
+                                        </td>
+                                        <td>Rp @item.UnitPrice.ToString("N0")</td>
+                                        <td>@item.Quantity</td>
+                                        <td><strong>Rp @item.TotalPrice.ToString("N0")</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <th colspan="4" class="text-end">Total Pesanan:</th>
+                                    <th><strong>Rp @order.TotalAmount.ToString("N0")</strong></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer & Status Info -->
+        <div class="col-md-4">
+            <!-- Customer Info -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user"></i> Informasi Customer
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Nama:</strong><br>@order.CustomerName</p>
+                    <p><strong>Email:</strong><br>@order.CustomerEmail</p>
+                    <p><strong>Telepon:</strong><br>@order.CustomerPhone</p>
+                    <p><strong>Alamat Pengiriman:</strong><br>@order.ShippingAddress</p>
+                </div>
+            </div>
+
+            <!-- Order Status -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Status Pesanan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form id="statusUpdateForm">
+                        <input type="hidden" name="id" value="@order.Id">
+
+                        <div class="mb-3">
+                            <label class="form-label">Status Saat Ini</label>
+                            <select name="status" class="form-select">
+                                @if (orderStatuses != null)
+                                {
+                                    @foreach (var status in orderStatuses)
+                                    {
+                                        var statusValue = status.ToString();
+                                        var displayName = GetStatusDisplayName(statusValue);
+                                        <option value="@statusValue" @(order.Status.ToString() == statusValue ? "selected" : "")>
+                                            @displayName
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Catatan</label>
+                            <textarea name="notes" class="form-control" rows="3"
+                                  placeholder="Tambahkan catatan...">@order.Notes</textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save"></i> Update Status
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history"></i> Informasi Pesanan
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Tanggal Pesanan:</strong><br>@order.OrderDate.ToString("dd MMMM yyyy, HH:mm")</p>
+                    <p><strong>Dibuat:</strong><br>@order.CreatedAt.ToString("dd MMMM yyyy, HH:mm")</p>
+                    <p><strong>Terakhir Update:</strong><br>@order.UpdatedAt.ToString("dd MMMM yyyy, HH:mm")</p>
+                    <p><strong>Total Item:</strong><br>@order.OrderItems.Count item(s)</p>
+                    <hr>
+                    <p class="mb-0">
+                        <strong>Total Pembayaran:</strong><br>
+                        <span class="h4 text-success">Rp @order.TotalAmount.ToString("N0")</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i> Pesanan tidak ditemukan.
+    </div>
+}
+
+@functions {
+    private string GetStatusDisplayName(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Menunggu Konfirmasi",
+            "Confirmed" => "Dikonfirmasi",
+            "Processing" => "Diproses",
+            "Shipped" => "Dikirim",
+            "Delivered" => "Selesai",
+            "Cancelled" => "Dibatalkan",
+            _ => status
+        };
+    }
+
+    private string GetStatusBadgeClass(IINSwalayan.Models.OrderStatus status)
+    {
+        return status switch
+        {
+            IINSwalayan.Models.OrderStatus.Pending => "bg-warning",
+            IINSwalayan.Models.OrderStatus.Confirmed => "bg-info",
+            IINSwalayan.Models.OrderStatus.Processing => "bg-primary",
+            IINSwalayan.Models.OrderStatus.Shipped => "bg-secondary",
+            IINSwalayan.Models.OrderStatus.Delivered => "bg-success",
+            IINSwalayan.Models.OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
+<script>
+    document.getElementById('statusUpdateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        var formData = new FormData(this);
+
+        // Add anti-forgery token
+        var token = document.querySelector('input[name="__RequestVerificationToken"]');
+        if (token) {
+            formData.append('__RequestVerificationToken', token.value);
+        }
+
+        fetch('@Url.Action("UpdateStatus")', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update status badge
+                var badge = document.getElementById('current-status-badge');
+                if (badge) {
+                    badge.textContent = data.newStatusDisplay;
+                    badge.className = 'badge fs-6 ' + getStatusBadgeClass(data.newStatus);
+                }
+
+                // Show success message
+                showAlert('success', data.message);
+
+                // Update timestamp
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'Terjadi kesalahan saat mengupdate status.');
+        });
+    });
+
+    function getStatusBadgeClass(status) {
+        switch(status) {
+            case 'Pending': return 'bg-warning';
+            case 'Confirmed': return 'bg-info';
+            case 'Processing': return 'bg-primary';
+            case 'Shipped': return 'bg-secondary';
+            case 'Delivered': return 'bg-success';
+            case 'Cancelled': return 'bg-danger';
+            default: return 'bg-secondary';
+        }
+    }
+
+    function showAlert(type, message) {
+        var alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        // Insert at top of main content
+        var container = document.querySelector('.row').firstElementChild;
+        container.insertAdjacentHTML('afterbegin', alertHtml);
+
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            var alert = container.querySelector('.alert');
+            if (alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    }
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

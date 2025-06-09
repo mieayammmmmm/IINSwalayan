@@ -20,6 +20,7 @@ namespace IINSwalayan.Areas.Admin.Controllers
         }
 
         // GET: Admin/Products
+       
         public async Task<IActionResult> Index()
         {
             try
@@ -80,7 +81,7 @@ namespace IINSwalayan.Areas.Admin.Controllers
                 }
 
                 // Handle image upload
-                string finalImageUrl = imageUrl;
+                string finalImageUrl = imageUrl ?? string.Empty;
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     finalImageUrl = await SaveImageFile(imageFile);
@@ -89,7 +90,7 @@ namespace IINSwalayan.Areas.Admin.Controllers
                 var product = new Product
                 {
                     Name = name,
-                    Description = description,
+                    Description = description ?? string.Empty,
                     Price = price,
                     Stock = stock,
                     CategoryId = categoryId,
@@ -174,7 +175,7 @@ namespace IINSwalayan.Areas.Admin.Controllers
                 }
 
                 // Handle image upload - prioritize file upload over URL
-                string finalImageUrl = product.ImageUrl; // Keep existing image as default
+                string finalImageUrl = product.ImageUrl ?? string.Empty; // Keep existing image as default
 
                 if (imageFile != null && imageFile.Length > 0)
                 {
@@ -188,15 +189,10 @@ namespace IINSwalayan.Areas.Admin.Controllers
                     finalImageUrl = imageUrl;
                     _logger.LogInformation($"Image URL updated during edit: {finalImageUrl}");
                 }
-                else if (string.IsNullOrEmpty(imageUrl))
-                {
-                    // If URL is cleared and no file uploaded, keep existing image
-                    // Don't change finalImageUrl
-                }
 
                 // Update product
                 product.Name = name;
-                product.Description = description;
+                product.Description = description ?? string.Empty;
                 product.Price = price;
                 product.Stock = stock;
                 product.CategoryId = categoryId;
@@ -265,9 +261,9 @@ namespace IINSwalayan.Areas.Admin.Controllers
             {
                 // Validate file type
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-                var fileExtension = Path.GetExtension(imageFile.FileName).ToLowerInvariant();
+                var fileExtension = Path.GetExtension(imageFile.FileName)?.ToLowerInvariant();
 
-                if (!allowedExtensions.Contains(fileExtension))
+                if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension))
                 {
                     throw new InvalidOperationException("Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WebP.");
                 }

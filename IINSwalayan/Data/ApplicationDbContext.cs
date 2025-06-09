@@ -13,6 +13,8 @@ namespace IINSwalayan.Data
 
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -25,7 +27,43 @@ namespace IINSwalayan.Data
                     .HasColumnType("decimal(18,2)");
             });
 
-            // Seed Categories
+            // Order configuration
+            builder.Entity<Order>(entity =>
+            {
+                entity.Property(e => e.TotalAmount)
+                    .HasColumnType("decimal(18,2)");
+            });
+
+            // OrderItem configuration
+            builder.Entity<OrderItem>(entity =>
+            {
+                entity.Property(e => e.UnitPrice)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(e => e.TotalPrice)
+                    .HasColumnType("decimal(18,2)");
+            });
+
+            // Relationships
+            builder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Existing seed data
             builder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Makanan", Description = "Berbagai jenis makanan", IconClass = "fas fa-utensils" },
                 new Category { Id = 2, Name = "Minuman", Description = "Berbagai jenis minuman", IconClass = "fas fa-coffee" },
@@ -33,7 +71,6 @@ namespace IINSwalayan.Data
                 new Category { Id = 4, Name = "Skincare", Description = "Produk perawatan kulit", IconClass = "fas fa-spray-can" }
             );
 
-            // Seed sample products
             builder.Entity<Product>().HasData(
                 new Product
                 {
