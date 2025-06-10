@@ -4,6 +4,36 @@
     var orderStatuses = ViewBag.OrderStatuses as Array;
 }
 
+@functions {
+    private string GetStatusDisplayName(string status)
+    {
+        return status switch
+        {
+            "Pending" => "Menunggu Konfirmasi",
+            "Confirmed" => "Dikonfirmasi",
+            "Processing" => "Diproses",
+            "Shipped" => "Dikirim",
+            "Delivered" => "Selesai",
+            "Cancelled" => "Dibatalkan",
+            _ => status
+        };
+    }
+    
+    private string GetStatusBadgeClass(IINSwalayan.Models.OrderStatus status)
+    {
+        return status switch
+        {
+            IINSwalayan.Models.OrderStatus.Pending => "bg-warning",
+            IINSwalayan.Models.OrderStatus.Confirmed => "bg-info",
+            IINSwalayan.Models.OrderStatus.Processing => "bg-primary",
+            IINSwalayan.Models.OrderStatus.Shipped => "bg-secondary",
+            IINSwalayan.Models.OrderStatus.Delivered => "bg-success",
+            IINSwalayan.Models.OrderStatus.Cancelled => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -248,36 +278,6 @@
     </div>
 </div>
 
-@functions {
-    private string GetStatusDisplayName(string status)
-    {
-        return status switch
-        {
-            "Pending" => "Menunggu Konfirmasi",
-            "Confirmed" => "Dikonfirmasi",
-            "Processing" => "Diproses",
-            "Shipped" => "Dikirim",
-            "Delivered" => "Selesai",
-            "Cancelled" => "Dibatalkan",
-            _ => status
-        };
-    }
-    
-    private string GetStatusBadgeClass(IINSwalayan.Models.OrderStatus status)
-    {
-        return status switch
-        {
-            IINSwalayan.Models.OrderStatus.Pending => "bg-warning",
-            IINSwalayan.Models.OrderStatus.Confirmed => "bg-info",
-            IINSwalayan.Models.OrderStatus.Processing => "bg-primary",
-            IINSwalayan.Models.OrderStatus.Shipped => "bg-secondary",
-            IINSwalayan.Models.OrderStatus.Delivered => "bg-success",
-            IINSwalayan.Models.OrderStatus.Cancelled => "bg-danger",
-            _ => "bg-secondary"
-        };
-    }
-}
-
 <script>
     function showUpdateStatusModal(orderId, currentStatus, orderNumber) {
         document.getElementById('orderId').value = orderId;
@@ -350,7 +350,8 @@
 
     function showAlert(type, message) {
         var alertHtml = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <div class="alert alert-${type} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -374,3 +375,5 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
+
+@Html.AntiForgeryToken()

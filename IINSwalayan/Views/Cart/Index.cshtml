@@ -1,0 +1,364 @@
+﻿@model IINSwalayan.Models.Cart
+@{
+    ViewData["Title"] = "Keranjang Belanja";
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Products", "Home")">Produk</a></li>
+            <li class="breadcrumb-item active">Keranjang Belanja</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">
+            <i class="fas fa-shopping-cart text-primary"></i> Keranjang Belanja
+        </h1>
+        @if (Model.CartItems.Any())
+        {
+            <div>
+                <span class="badge bg-primary fs-6">@Model.TotalItems item(s)</span>
+            </div>
+        }
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (Model.CartItems.Any())
+    {
+        <div class="row">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Item dalam Keranjang</h5>
+                        <form method="post" asp-action="Clear" class="d-inline"
+                              onsubmit="return confirm('Yakin ingin mengosongkan keranjang?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash"></i> Kosongkan Keranjang
+                            </button>
+                        </form>
+                    </div>
+                    <div class="card-body p-0">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="cart-item border-bottom p-4" id="cart-item-@item.ProductId">
+                                <div class="row align-items-center">
+                                    <!-- Product Image -->
+                                    <div class="col-md-2">
+                                        @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                                        {
+                                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name"
+                                                 class="img-fluid rounded" style="max-height: 80px;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                                                 style="height: 80px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Product Info -->
+                                    <div class="col-md-4">
+                                        <h6 class="mb-1">@item.Product.Name</h6>
+                                        @if (item.Product.Category != null)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="@item.Product.Category.IconClass"></i> @item.Product.Category.Name
+                                            </small>
+                                        }
+                                        <br>
+                                        <small class="text-muted">Stok tersedia: @item.Product.Stock</small>
+                                    </div>
+
+                                    <!-- Price -->
+                                    <div class="col-md-2 text-center">
+                                        <div class="text-muted small">Harga Satuan</div>
+                                        <strong>Rp @item.UnitPrice.ToString("N0")</strong>
+                                    </div>
+
+                                    <!-- Quantity Controls -->
+                                    <div class="col-md-2">
+                                        <div class="input-group input-group-sm">
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                    onclick="updateQuantity(@item.ProductId, @(item.Quantity - 1))">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" class="form-control text-center"
+                                                   value="@item.Quantity" min="1" max="@item.Product.Stock"
+                                                   onchange="updateQuantity(@item.ProductId, this.value)"
+                                                   id="quantity-@item.ProductId">
+                                            <button class="btn btn-outline-secondary" type="button"
+                                                    onclick="updateQuantity(@item.ProductId, @(item.Quantity + 1))"
+                                                    @(item.Quantity >= item.Product.Stock ? "disabled" : "")>
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Total & Remove -->
+                                    <div class="col-md-2 text-end">
+                                        <div class="text-muted small">Total</div>
+                                        <strong class="text-primary" id="total-@item.ProductId">
+                                            Rp @item.TotalPrice.ToString("N0")
+                                        </strong>
+                                        <br>
+                                        <button class="btn btn-outline-danger btn-sm mt-1"
+                                                onclick="removeItem(@item.ProductId)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Continue Shopping -->
+                <div class="mt-3">
+                    <a href="@Url.Action("Products", "Home")" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Lanjut Belanja
+                    </a>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5 class="mb-0">Ringkasan Pesanan</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal (@Model.TotalItems item)</span>
+                            <span id="cart-subtotal">Rp @Model.TotalAmount.ToString("N0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Biaya Pengiriman</span>
+                            <span class="text-success">GRATIS</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total</strong>
+                            <strong class="text-primary fs-5" id="cart-total">Rp @Model.TotalAmount.ToString("N0")</strong>
+                        </div>
+
+                        <div class="d-grid">
+                            <a href="@Url.Action("Checkout", "Order")" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card"></i> Checkout
+                            </a>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt text-success"></i>
+                                Transaksi aman dan terpercaya
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Promo Section -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-tag text-warning"></i> Kode Promo
+                        </h6>
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Masukkan kode promo">
+                            <button class="btn btn-outline-secondary" type="button">
+                                Gunakan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty Cart -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-shopping-cart fa-5x text-muted"></i>
+            </div>
+            <h3>Keranjang Belanja Kosong</h3>
+            <p class="text-muted mb-4">
+                Anda belum menambahkan produk ke keranjang belanja.
+                Mulai berbelanja sekarang!
+            </p>
+            <div class="d-flex gap-3 justify-content-center">
+                <a href="@Url.Action("Products", "Home")" class="btn btn-primary btn-lg">
+                    <i class="fas fa-shopping-bag"></i> Mulai Berbelanja
+                </a>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-home"></i> Kembali ke Beranda
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    function updateQuantity(productId, quantity) {
+        quantity = parseInt(quantity);
+
+        if (quantity < 1) {
+            if (confirm('Hapus produk ini dari keranjang?')) {
+                removeItem(productId);
+            } else {
+                // Reset quantity to 1
+                document.getElementById(`quantity-${productId}`).value = 1;
+            }
+            return;
+        }
+
+        fetch('@Url.Action("UpdateQuantity", "Cart")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: `productId=${productId}&quantity=${quantity}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update quantity input
+                document.getElementById(`quantity-${productId}`).value = quantity;
+
+                // Update item total
+                const unitPrice = parseFloat(document.getElementById(`quantity-${productId}`)
+                    .closest('.cart-item')
+                    .querySelector('strong')
+                    .textContent.replace(/[^0-9]/g, ''));
+                const newTotal = unitPrice * quantity;
+                document.getElementById(`total-${productId}`).textContent =
+                    'Rp ' + newTotal.toLocaleString('id-ID');
+
+                // Update cart totals
+                updateCartTotals(data.cartTotal, data.cartCount);
+
+                showAlert('success', data.message);
+            } else {
+                showAlert('danger', data.message);
+                // Reset to original value
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'Terjadi kesalahan saat memperbarui keranjang.');
+        });
+    }
+
+    function removeItem(productId) {
+        if (!confirm('Yakin ingin menghapus produk ini dari keranjang?')) {
+            return;
+        }
+
+        fetch('@Url.Action("RemoveItem", "Cart")', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: `productId=${productId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove item from DOM
+                const itemElement = document.getElementById(`cart-item-${productId}`);
+                itemElement.style.opacity = '0.5';
+                itemElement.style.transform = 'translateX(-100%)';
+
+                setTimeout(() => {
+                    itemElement.remove();
+
+                    // Update cart totals
+                    updateCartTotals(data.cartTotal, data.cartCount);
+
+                    // Check if cart is empty
+                    if (data.cartCount === 0) {
+                        location.reload();
+                    }
+                }, 300);
+
+                showAlert('success', data.message);
+            } else {
+                showAlert('danger', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('danger', 'Terjadi kesalahan saat menghapus produk.');
+        });
+    }
+
+    function updateCartTotals(total, count) {
+        const subtotalElement = document.getElementById('cart-subtotal');
+        const totalElement = document.getElementById('cart-total');
+
+        if (subtotalElement) {
+            subtotalElement.textContent = 'Rp ' + parseInt(total).toLocaleString('id-ID');
+        }
+        if (totalElement) {
+            totalElement.textContent = 'Rp ' + parseInt(total).toLocaleString('id-ID');
+        }
+
+        // Update navbar cart count
+        const cartBadge = document.querySelector('.cart-badge');
+        if (cartBadge) {
+            cartBadge.textContent = count;
+        }
+    }
+
+    function showAlert(type, message) {
+        const alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show position-fixed"
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', alertHtml);
+
+        setTimeout(() => {
+            const alert = document.querySelector('.alert');
+            if (alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 5000);
+    }
+
+    // Add smooth animations
+    document.querySelectorAll('.cart-item').forEach(item => {
+        item.style.transition = 'all 0.3s ease';
+    });
+</script>
+
+@Html.AntiForgeryToken()

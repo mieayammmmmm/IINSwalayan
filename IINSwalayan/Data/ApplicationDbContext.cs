@@ -15,6 +15,8 @@ namespace IINSwalayan.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<CartItem> CartItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -44,6 +46,13 @@ namespace IINSwalayan.Data
                     .HasColumnType("decimal(18,2)");
             });
 
+            // CartItem configuration
+            builder.Entity<CartItem>(entity =>
+            {
+                entity.Property(e => e.UnitPrice)
+                    .HasColumnType("decimal(18,2)");
+            });
+
             // Relationships
             builder.Entity<Order>()
                 .HasOne(o => o.User)
@@ -61,6 +70,25 @@ namespace IINSwalayan.Data
                 .HasOne(oi => oi.Product)
                 .WithMany()
                 .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Cart relationships
+            builder.Entity<Cart>()
+                .HasOne(c => c.User)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.Cart)
+                .WithMany(c => c.CartItems)
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<CartItem>()
+                .HasOne(ci => ci.Product)
+                .WithMany()
+                .HasForeignKey(ci => ci.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Existing seed data

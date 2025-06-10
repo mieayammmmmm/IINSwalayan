@@ -21,15 +21,15 @@ namespace IINSwalayan.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Login(string? returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = returnUrl ?? string.Empty;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string email, string password, string returnUrl = null)
+        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
         {
             try
             {
@@ -94,7 +94,7 @@ namespace IINSwalayan.Controllers
                 ViewBag.Error = "Terjadi kesalahan saat login. Silakan coba lagi.";
             }
 
-            ViewData["ReturnUrl"] = returnUrl;
+            ViewData["ReturnUrl"] = returnUrl ?? string.Empty;
             return View();
         }
 
@@ -139,7 +139,8 @@ namespace IINSwalayan.Controllers
                 {
                     UserName = email,
                     Email = email,
-                    // Add other properties if needed
+                    FullName = fullName ?? string.Empty,
+                    EmailConfirmed = true
                 };
 
                 var result = await _userManager.CreateAsync(user, password);
@@ -157,10 +158,7 @@ namespace IINSwalayan.Controllers
                 }
                 else
                 {
-                    foreach (var error in result.Errors)
-                    {
-                        ViewBag.Error += error.Description + " ";
-                    }
+                    ViewBag.Error = string.Join(" ", result.Errors.Select(e => e.Description));
                 }
             }
             catch (Exception ex)

@@ -1,0 +1,273 @@
+﻿@{
+    ViewData["Title"] = "Checkout";
+    var user = ViewBag.User as IINSwalayan.Models.ApplicationUser;
+    var cart = ViewBag.Cart as IINSwalayan.Models.Cart;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")">Beranda</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Cart")">Keranjang</a></li>
+            <li class="breadcrumb-item active">Checkout</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">
+            <i class="fas fa-credit-card text-primary"></i> Checkout
+        </h1>
+        <div class="steps">
+            <span class="badge bg-success">1. Keranjang ✓</span>
+            <span class="badge bg-primary">2. Checkout</span>
+            <span class="badge bg-secondary">3. Selesai</span>
+        </div>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form method="post" asp-action="PlaceOrder" id="checkoutForm">
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <!-- Left Column - Form -->
+            <div class="col-lg-7">
+                <!-- Customer Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user"></i> Informasi Pembeli
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="customerName" class="form-label">Nama Lengkap *</label>
+                                <input type="text" class="form-control" id="customerName" name="customerName"
+                                       value="@(user?.FullName)" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="customerEmail" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="customerEmail" name="customerEmail"
+                                       value="@(user?.Email)" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customerPhone" class="form-label">Nomor Telepon *</label>
+                            <input type="tel" class="form-control" id="customerPhone" name="customerPhone"
+                                   value="@(user?.PhoneNumber)" placeholder="08xxxxxxxxxx" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Information -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-shipping-fast"></i> Alamat Pengiriman
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="shippingAddress" class="form-label">Alamat Lengkap *</label>
+                            <textarea class="form-control" id="shippingAddress" name="shippingAddress"
+                                      rows="4" placeholder="Masukkan alamat lengkap termasuk RT/RW, Kelurahan, Kecamatan, Kota/Kabupaten, Provinsi, Kode Pos"
+                                      required>@(user?.Address)</textarea>
+                            <div class="form-text">
+                                Pastikan alamat lengkap dan benar untuk memudahkan pengiriman
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-credit-card"></i> Metode Pembayaran
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" checked>
+                                    <label class="form-check-label" for="cod">
+                                        <i class="fas fa-money-bill-wave text-success"></i>
+                                        <strong>Cash on Delivery (COD)</strong>
+                                        <br><small class="text-muted">Bayar saat barang diterima</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="transfer" value="transfer" disabled>
+                                    <label class="form-check-label text-muted" for="transfer">
+                                        <i class="fas fa-university"></i>
+                                        <strong>Transfer Bank</strong>
+                                        <br><small>Segera hadir</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sticky-note"></i> Catatan Tambahan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <textarea class="form-control" id="notes" name="notes" rows="3"
+                                      placeholder="Catatan untuk penjual (opsional)"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Order Summary -->
+            <div class="col-lg-5">
+                <div class="card sticky-top" style="top: 20px;">
+                    <div class="card-header">
+                        <h5 class="mb-0">Ringkasan Pesanan</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Items -->
+                        @if (cart != null && cart.CartItems.Any())
+                        {
+                            @foreach (var item in cart.CartItems)
+                            {
+                                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                                        {
+                                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name"
+                                                 class="me-3 rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        }
+                                        <div>
+                                            <h6 class="mb-0">@item.Product.Name</h6>
+                                            <small class="text-muted">@item.Quantity x Rp @item.UnitPrice.ToString("N0")</small>
+                                        </div>
+                                    </div>
+                                    <strong>Rp @item.TotalPrice.ToString("N0")</strong>
+                                </div>
+                            }
+                        }
+
+                        <!-- Totals -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal (@(cart?.TotalItems ?? 0) item)</span>
+                            <span>Rp @(cart?.TotalAmount.ToString("N0") ?? "0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Biaya Pengiriman</span>
+                            <span class="text-success">GRATIS</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Biaya Admin</span>
+                            <span>Rp 0</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total Pembayaran</strong>
+                            <strong class="text-primary fs-5">Rp @(cart?.TotalAmount.ToString("N0") ?? "0")</strong>
+                        </div>
+
+                        <!-- Terms -->
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                Saya setuju dengan <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">syarat dan ketentuan</a>
+                            </label>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="placeOrderBtn">
+                                <i class="fas fa-shopping-cart"></i> Buat Pesanan
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt text-success"></i>
+                                Transaksi aman dan terpercaya
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Syarat dan Ketentuan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Ketentuan Umum</h6>
+                <p>Dengan melakukan pemesanan, Anda menyetujui semua syarat dan ketentuan yang berlaku.</p>
+
+                <h6>2. Pembayaran</h6>
+                <p>Pembayaran COD dilakukan saat barang diterima. Pastikan uang pas untuk memudahkan transaksi.</p>
+
+                <h6>3. Pengiriman</h6>
+                <p>Pengiriman dilakukan 1-3 hari kerja setelah pesanan dikonfirmasi.</p>
+
+                <h6>4. Pengembalian</h6>
+                <p>Barang dapat dikembalikan jika ada kerusakan atau tidak sesuai pesanan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Saya Mengerti</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+        const btn = document.getElementById('placeOrderBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        btn.disabled = true;
+
+        // Re-enable after 10 seconds if something goes wrong
+        setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-shopping-cart"></i> Buat Pesanan';
+            btn.disabled = false;
+        }, 10000);
+    });
+
+    // Format phone number
+    document.getElementById('customerPhone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.startsWith('0')) {
+            e.target.value = value;
+        } else if (value.startsWith('62')) {
+            e.target.value = '0' + value.substring(2);
+        }
+    });
+</script>

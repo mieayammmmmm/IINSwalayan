@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using IINSwalayan.Data;
 using IINSwalayan.Models;
+using IINSwalayan.Services; // TAMBAHKAN INI
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
 
 builder.Services.AddControllersWithViews();
 
+// TAMBAHKAN INI: Register custom services
+builder.Services.AddScoped<ICartService, CartService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,7 +38,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -83,7 +89,6 @@ static async Task SeedAdminUser(UserManager<ApplicationUser> userManager, RoleMa
     // Create admin user
     string adminEmail = "admin@iinswalayan.com";
     string adminPassword = "Admin123!";
-
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
         var adminUser = new ApplicationUser
@@ -91,9 +96,8 @@ static async Task SeedAdminUser(UserManager<ApplicationUser> userManager, RoleMa
             UserName = adminEmail,
             Email = adminEmail,
             EmailConfirmed = true,
-            FullName = "Administrator" // Tambahkan ini jika diperlukan
+            FullName = "Administrator"
         };
-
         var result = await userManager.CreateAsync(adminUser, adminPassword);
         if (result.Succeeded)
         {

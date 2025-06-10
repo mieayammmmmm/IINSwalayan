@@ -1,0 +1,178 @@
+﻿@{
+    ViewData["Title"] = "Daftar Akun Baru - IIN Swalayan";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3><i class="fas fa-user-plus"></i> Daftar Akun Baru</h3>
+                    <p class="mb-0">Bergabunglah dengan IIN Swalayan</p>
+                </div>
+                <div class="card-body p-4">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                        </div>
+                    }
+
+                    <form method="post" asp-controller="Account" asp-action="Register" id="registerForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label">Nama Lengkap *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input name="fullName" type="text" class="form-control"
+                                       placeholder="Masukkan nama lengkap" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input name="email" type="email" class="form-control"
+                                       placeholder="contoh@email.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input name="password" type="password" class="form-control"
+                                       placeholder="Minimal 6 karakter" required minlength="6">
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye" id="togglePassword1"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">Password harus minimal 6 karakter</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Konfirmasi Password *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input name="confirmPassword" type="password" class="form-control"
+                                       placeholder="Ulangi password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword')">
+                                    <i class="fas fa-eye" id="togglePassword2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    Saya setuju dengan <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">syarat dan ketentuan</a>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="registerBtn">
+                                <i class="fas fa-user-plus"></i> Daftar Sekarang
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0">
+                            Sudah punya akun?
+                            <a href="@Url.Action("Login", "Account")" class="text-decoration-none">
+                                <strong>Login di sini</strong>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="card mt-4 border-0">
+                <div class="card-body">
+                    <h6 class="text-center mb-3">Keuntungan Menjadi Member:</h6>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <i class="fas fa-shipping-fast text-primary mb-2 d-block"></i>
+                            <small>Gratis Ongkir</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-history text-success mb-2 d-block"></i>
+                            <small>Histori Pesanan</small>
+                        </div>
+                        <div class="col-4">
+                            <i class="fas fa-gift text-warning mb-2 d-block"></i>
+                            <small>Promo Eksklusif</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Syarat dan Ketentuan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Pendaftaran Akun</h6>
+                <p>Dengan mendaftar, Anda menyetujui untuk memberikan informasi yang akurat dan terkini.</p>
+
+                <h6>2. Penggunaan Platform</h6>
+                <p>Platform ini hanya boleh digunakan untuk tujuan yang sah dan sesuai dengan ketentuan yang berlaku.</p>
+
+                <h6>3. Privasi</h6>
+                <p>Kami berkomitmen melindungi data pribadi Anda sesuai dengan kebijakan privasi kami.</p>
+
+                <h6>4. Pemesanan dan Pembayaran</h6>
+                <p>Semua pesanan tunduk pada ketersediaan stok dan konfirmasi pembayaran.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Saya Setuju</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(inputName) {
+        const input = document.querySelector(`input[name="${inputName}"]`);
+        const icon = input.nextElementSibling.querySelector('i');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // Form validation
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const password = document.querySelector('input[name="password"]').value;
+        const confirmPassword = document.querySelector('input[name="confirmPassword"]').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Password dan konfirmasi password tidak sama!');
+            return false;
+        }
+
+        // Show loading
+        const btn = document.getElementById('registerBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mendaftar...';
+        btn.disabled = true;
+    });
+</script>

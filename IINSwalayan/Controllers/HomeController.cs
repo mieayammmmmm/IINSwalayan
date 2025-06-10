@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using IINSwalayan.Data;
 using IINSwalayan.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Diagnostics;
 
 namespace IINSwalayan.Controllers
 {
@@ -50,7 +51,7 @@ namespace IINSwalayan.Controllers
             }
         }
 
-        public async Task<IActionResult> Products(int? categoryId, string search, int page = 1)
+        public async Task<IActionResult> Products(int? categoryId, string? search, int page = 1)
         {
             try
             {
@@ -69,7 +70,8 @@ namespace IINSwalayan.Controllers
                 // Filter by search
                 if (!string.IsNullOrEmpty(search))
                 {
-                    query = query.Where(p => p.Name.Contains(search) || p.Description.Contains(search));
+                    query = query.Where(p => p.Name.Contains(search) ||
+                                           (p.Description != null && p.Description.Contains(search)));
                     ViewBag.SearchTerm = search;
                 }
 
@@ -93,6 +95,7 @@ namespace IINSwalayan.Controllers
                 ViewBag.CurrentPage = page;
                 ViewBag.TotalPages = (int)Math.Ceiling(totalProducts / (double)pageSize);
                 ViewBag.TotalProducts = totalProducts;
+                ViewBag.CategoryId = categoryId;
 
                 ViewData["Title"] = "Semua Produk - IIN Swalayan";
                 return View();
@@ -160,7 +163,7 @@ namespace IINSwalayan.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View();
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }
 }

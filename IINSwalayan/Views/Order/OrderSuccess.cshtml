@@ -1,0 +1,172 @@
+﻿@{
+    ViewData["Title"] = "Pesanan Berhasil";
+    var order = ViewBag.Order as IINSwalayan.Models.Order;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Message -->
+            <div class="text-center mb-5">
+                <div class="mb-4">
+                    <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                </div>
+                <h1 class="text-success mb-3">Pesanan Berhasil Dibuat!</h1>
+                <p class="lead text-muted">
+                    Terima kasih telah berbelanja di IIN Swalayan. Pesanan Anda sedang diproses.
+                </p>
+            </div>
+
+            @if (order != null)
+            {
+                <!-- Order Details Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-receipt"></i> Detail Pesanan
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Nomor Pesanan</h6>
+                                <h4 class="text-primary">#@order.OrderNumber</h4>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <h6 class="text-muted">Status Pesanan</h6>
+                                <span class="badge bg-warning fs-6">Menunggu Konfirmasi</span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <h6 class="text-muted">Tanggal Pesanan</h6>
+                                <p>@order.OrderDate.ToString("dd MMMM yyyy, HH:mm")</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-muted">Total Pembayaran</h6>
+                                <h5 class="text-success">Rp @order.TotalAmount.ToString("N0")</h5>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-muted">Metode Pembayaran</h6>
+                                <p><i class="fas fa-money-bill-wave text-success"></i> Cash on Delivery</p>
+                            </div>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Informasi Pembeli</h6>
+                                <p class="mb-1"><strong>@order.CustomerName</strong></p>
+                                <p class="mb-1">@order.CustomerEmail</p>
+                                <p class="mb-0">@order.CustomerPhone</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Alamat Pengiriman</h6>
+                                <p>@order.ShippingAddress</p>
+                            </div>
+                        </div>
+
+                        <!-- Order Items -->
+                        <h6 class="text-muted mb-3">Item Pesanan</h6>
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    @foreach (var item in order.OrderItems)
+                                    {
+                                        <tr>
+                                            <td style="width: 80px;">
+                                                @if (!string.IsNullOrEmpty(item.Product.ImageUrl))
+                                                {
+                                                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name" 
+                                                         class="img-fluid rounded" style="max-height: 60px;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                         style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <h6 class="mb-1">@item.Product.Name</h6>
+                                                <small class="text-muted">@item.Quantity x Rp @item.UnitPrice.ToString("N0")</small>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong>Rp @item.TotalPrice.ToString("N0")</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="border-top">
+                                        <td colspan="2"><strong>Total</strong></td>
+                                        <td class="text-end"><strong class="text-success">Rp @order.TotalAmount.ToString("N0")</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(order.Notes))
+                        {
+                            <div class="mt-3">
+                                <h6 class="text-muted">Catatan</h6>
+                                <p class="bg-light p-3 rounded">@order.Notes</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- What's Next -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> Langkah Selanjutnya
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="text-primary mb-2">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                                <h6>1. Konfirmasi</h6>
+                                <p class="small text-muted">Admin akan mengkonfirmasi pesanan Anda dalam 1-2 jam</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="text-warning mb-2">
+                                    <i class="fas fa-box fa-2x"></i>
+                                </div>
+                                <h6>2. Packing</h6>
+                                <p class="small text-muted">Pesanan akan dikemas dengan baik dan aman</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="text-success mb-2">
+                                    <i class="fas fa-shipping-fast fa-2x"></i>
+                                </div>
+                                <h6>3. Pengiriman</h6>
+                                <p class="small text-muted">Barang dikirim ke alamat Anda (1-3 hari kerja)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-5">
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="@Url.Action("MyOrders", "Order")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-list"></i> Lihat Pesanan Saya
+                    </a>
+                    <a href="@Url.Action("Products", "Home")" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-shopping-bag"></i> Lanjut Belanja
+                    </a>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-home"></i> Kembali ke Beranda
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
