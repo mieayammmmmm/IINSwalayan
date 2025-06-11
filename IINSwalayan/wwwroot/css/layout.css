@@ -1,0 +1,323 @@
+﻿/* Layout CSS for IIN Swalayan */
+:root {
+    --primary-color: #e74c3c;
+    --secondary-color: #2c3e50;
+    --success-color: #27ae60;
+    --warning-color: #f39c12;
+    --info-color: #3498db;
+    --light-bg: #f8f9fa;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Top Bar */
+.top-bar {
+    background: linear-gradient(135deg, var(--primary-color), #c0392b);
+    color: white;
+    padding: 8px 0;
+    font-size: 0.875rem;
+}
+
+    .top-bar a {
+        color: white;
+        text-decoration: none;
+    }
+
+        .top-bar a:hover {
+            color: #f1c40f;
+        }
+
+/* Main Header */
+.main-header {
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--primary-color) !important;
+    text-decoration: none;
+}
+
+    .navbar-brand:hover {
+        color: #c0392b !important;
+    }
+
+    .navbar-brand i {
+        margin-right: 8px;
+    }
+
+/* Search Bar */
+.search-container {
+    position: relative;
+    max-width: 500px;
+    flex: 1;
+}
+
+.search-input {
+    border-radius: 25px;
+    border: 2px solid #e9ecef;
+    padding: 12px 50px 12px 20px;
+    font-size: 0.95rem;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+    .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+        outline: none;
+    }
+
+.search-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--primary-color);
+    border: none;
+    border-radius: 20px;
+    width: 40px;
+    height: 40px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .search-btn:hover {
+        background: #c0392b;
+        transform: translateY(-50%) scale(1.05);
+    }
+
+/* Navigation Menu */
+.nav-menu {
+    background: var(--light-bg);
+    border-top: 1px solid #dee2e6;
+}
+
+.nav-link {
+    color: var(--secondary-color) !important;
+    font-weight: 500;
+    padding: 12px 16px !important;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+    margin: 0 2px;
+}
+
+    .nav-link:hover {
+        color: var(--primary-color) !important;
+        background-color: rgba(231, 76, 60, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .nav-link.active {
+        color: var(--primary-color) !important;
+        background-color: rgba(231, 76, 60, 0.15);
+    }
+
+    .nav-link i {
+        margin-right: 6px;
+    }
+
+/* User Menu */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-auth {
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    border: 2px solid var(--primary-color);
+}
+
+.btn-login {
+    color: var(--primary-color);
+    background: white;
+}
+
+    .btn-login:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+.btn-register {
+    background: var(--primary-color);
+    color: white;
+}
+
+    .btn-register:hover {
+        background: #c0392b;
+        border-color: #c0392b;
+        transform: translateY(-1px);
+        color: white;
+    }
+
+/* Cart Badge */
+.cart-link {
+    position: relative;
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    .cart-link:hover {
+        color: var(--primary-color);
+        transform: scale(1.1);
+    }
+
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* User Dropdown */
+.user-dropdown {
+    position: relative;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    color: var(--secondary-color);
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+    .user-info:hover {
+        background-color: var(--light-bg);
+        color: var(--primary-color);
+    }
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    border-radius: 10px;
+    padding: 8px 0;
+    margin-top: 8px;
+}
+
+.dropdown-item {
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+}
+
+    .dropdown-item:hover {
+        background-color: rgba(231, 76, 60, 0.1);
+        color: var(--primary-color);
+    }
+
+    .dropdown-item i {
+        width: 20px;
+        margin-right: 8px;
+    }
+
+/* Footer */
+.footer {
+    background: var(--secondary-color);
+    color: white;
+    padding: 40px 0 20px 0;
+    margin-top: auto;
+}
+
+    .footer h5 {
+        color: var(--primary-color);
+    }
+
+    .footer a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+
+        .footer a:hover {
+            color: var(--primary-color);
+        }
+
+.footer-divider {
+    border-color: rgba(255,255,255,0.2);
+    margin: 30px 0;
+}
+
+/* Page content */
+.page-content {
+    min-height: calc(100vh - 200px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 991.98px) {
+    .search-container {
+        max-width: 100%;
+        margin: 10px 0;
+    }
+
+    .user-menu {
+        margin-top: 10px;
+        justify-content: center;
+    }
+
+    .nav-menu {
+        padding: 10px 0;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .top-bar {
+        text-align: center;
+    }
+
+        .top-bar .d-none {
+            display: none !important;
+        }
+
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+
+    .btn-auth {
+        padding: 6px 16px;
+        font-size: 0.85rem;
+    }
+}
