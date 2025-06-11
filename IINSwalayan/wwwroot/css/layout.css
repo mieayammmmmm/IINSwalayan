@@ -134,37 +134,59 @@ body {
     gap: 15px;
 }
 
-.btn-auth {
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    border: 2px solid var(--primary-color);
-}
-
-.btn-login {
-    color: var(--primary-color);
-    background: white;
-}
-
-    .btn-login:hover {
-        background: var(--primary-color);
-        color: white;
-        transform: translateY(-1px);
+    /* Button Auth - Updated with more specific selectors and !important */
+    .user-menu .btn-auth,
+    .user-menu a.btn-auth {
+        padding: 8px 20px !important;
+        border-radius: 20px !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        transition: all 0.3s ease !important;
+        font-size: 0.9rem !important;
+        border: 2px solid var(--primary-color) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
+        line-height: 1 !important;
+        min-width: auto !important;
     }
 
-.btn-register {
-    background: var(--primary-color);
-    color: white;
-}
+    .user-menu .btn-login,
+    .user-menu a.btn-login {
+        color: var(--primary-color) !important;
+        background: white !important;
+    }
 
-    .btn-register:hover {
-        background: #c0392b;
-        border-color: #c0392b;
-        transform: translateY(-1px);
-        color: white;
+        .user-menu .btn-login:hover,
+        .user-menu a.btn-login:hover {
+            background: var(--primary-color) !important;
+            color: white !important;
+            transform: translateY(-1px) !important;
+            text-decoration: none !important;
+        }
+
+    .user-menu .btn-register,
+    .user-menu a.btn-register {
+        background: var(--primary-color) !important;
+        color: white !important;
+    }
+
+        .user-menu .btn-register:hover,
+        .user-menu a.btn-register:hover {
+            background: #c0392b !important;
+            border-color: #c0392b !important;
+            transform: translateY(-1px) !important;
+            color: white !important;
+            text-decoration: none !important;
+        }
+
+    /* Override any Bootstrap button styles in user menu */
+    .user-menu .btn,
+    .user-menu a.btn {
+        font-size: 0.9rem !important;
+        padding: 8px 20px !important;
+        border-radius: 20px !important;
     }
 
 /* Cart Badge */
@@ -174,22 +196,25 @@ body {
     font-size: 1.5rem;
     text-decoration: none;
     transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 50%;
 }
 
     .cart-link:hover {
         color: var(--primary-color);
         transform: scale(1.1);
+        background-color: rgba(231, 76, 60, 0.1);
     }
 
 .cart-badge {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: -2px;
+    right: -2px;
     background: var(--primary-color);
     color: white;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     font-size: 0.7rem;
     display: flex;
     align-items: center;
@@ -215,6 +240,7 @@ body {
     .user-info:hover {
         background-color: var(--light-bg);
         color: var(--primary-color);
+        text-decoration: none;
     }
 
 .user-avatar {
@@ -228,6 +254,7 @@ body {
     color: white;
     font-weight: bold;
     margin-right: 8px;
+    font-size: 14px;
 }
 
 /* Dropdown Menu */
@@ -316,8 +343,24 @@ body {
         font-size: 1.5rem;
     }
 
-    .btn-auth {
-        padding: 6px 16px;
-        font-size: 0.85rem;
+    /* Mobile button styling */
+    .user-menu .btn-auth,
+    .user-menu a.btn-auth {
+        padding: 6px 16px !important;
+        font-size: 0.85rem !important;
+    }
+
+    .user-menu {
+        gap: 8px !important;
+    }
+
+    .cart-link {
+        font-size: 1.3rem;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
     }
 }
